@@ -112,14 +112,14 @@ class Player(Character):
         self.attack_speed: int = 4
 
     def get_effective_melee_strength(self):
-        eff_str = ac.calc_effective_melee_strength_level(
-            self.combat_stats.strength, self.boost, 1.0, 3
+        eff_str = ac.calc_effective_level(
+            self.combat_stats.strength, self.boost, 1.0, 'melee', 3
         )
         self.effective_melee_strength = eff_str
 
     def get_effective_melee_attack(self):
-        eff_atk = ac.calc_effective_melee_attack_level(
-            self.combat_stats.attack, self.boost, 1.0, 0
+        eff_atk = ac.calc_effective_level(
+            self.combat_stats.attack, self.boost, 1.0, 'melee', 0
         )
 
         self.effective_melee_attack = eff_atk
@@ -128,7 +128,7 @@ class Player(Character):
         self.get_effective_melee_attack()
         self.get_effective_melee_strength()
 
-        max_hit = ac.calc_max_melee_hit(self.effective_melee_strength, 0)
+        max_hit = ac.calc_max_hit(self.effective_melee_strength, 0)
         max_attack_roll = ac.calc_max_attack_roll(self.effective_melee_attack, 0)
         enemy_max_defence_roll = ac.calc_npc_max_defence_roll(
             enemy.combat_stats.defence, enemy.defensive_stat.crush_defence_bonus

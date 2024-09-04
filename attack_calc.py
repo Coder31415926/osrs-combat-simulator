@@ -2,10 +2,11 @@ import math
 import random as rand
 
 
-def calc_effective_melee_strength_level(
+def calc_effective_level(
     base_level: int,
     boost: int,
     prayer: float,
+    style: str,
     stance_bonus: int = 0,
     void: bool = False,
 ) -> int:
@@ -15,6 +16,7 @@ def calc_effective_melee_strength_level(
         base_level (int): Non boosted strength stat, from 1 to 99
         boost (int): additional boost caused by potion, overload, smelling salts, etc
         prayer (float): a postive multiplier from the strength-boosting offensive prayers like Piety
+        style: what combat stat you are calculating for (attack,strength,defence,ranged,magic)
         stance_bonus (int, optional): combat stance in-game, typically +3 if stance is aggressive. Defaults to 0
         void (bool, optional): Whether the player is wearing Void Melee. Defaults to False.
 
@@ -25,191 +27,34 @@ def calc_effective_melee_strength_level(
     effective_level = math.floor(effective_level)
     effective_level += stance_bonus
     effective_level += 8
-    if void:
+    if void and style.lower() != 'mage' and style.lower() != 'defence':
         effective_level *= 1.1
-
-    effective_level = math.floor(effective_level)
-    return effective_level
-
-
-# Potential DRY violations here, but I want granularity between the effective level calculations for now esp with elite / reg void, future refactors may include combining functions
-def calc_effective_melee_attack_level(
-    base_level: int,
-    boost: int,
-    prayer: float,
-    stance_bonus: int = 0,
-    void: bool = False,
-) -> int:
-    """Calcuate a player's effective melee attack level
-
-    Args:
-        base_level (int): Non boosted attack stat, from 1 to 99
-        boost (int): additional boost caused by potion, overload, smelling salts, etc
-        prayer (float): a postive multiplier from the attack-boosting offensive prayers like Piety
-        stance_bonus (int, optional): combat stance in-game, typically +3 if stance is accurate. Defaults to 0
-        void (bool, optional): Whether the player is wearing Void Melee. Defaults to False.
-
-    Returns:
-        int: An effective melee attack level
-    """
-    effective_level = (base_level + boost) * prayer
-    effective_level = math.floor(effective_level)
-    effective_level += stance_bonus
-    effective_level += 8
-    if void:
-        effective_level *= 1.1
-
-    effective_level = math.floor(effective_level)
-    return effective_level
-
-
-def calc_effective_range_strength_level(
-    base_level: int,
-    boost: int,
-    prayer: float,
-    stance_bonus: int = 0,
-    void: bool = False,
-) -> int:
-    """Calcuate a player's effective range strength level
-
-    Args:
-        base_level (int): Non boosted range stat, from 1 to 99
-        boost (int): additional boost caused by potion, overload, smelling salts, etc
-        prayer (float): a postive multiplier from the range-strength-boosting offensive prayers like Rigour
-        stance_bonus (int, optional): combat stance in-game, typically +3 if stance is accurate. Defaults to 0
-        void (bool, optional): Whether the player is wearing Elite Void Range. Defaults to False.
-
-    Returns:
-        int: An effective range strength level
-    """
-    effective_level = (base_level + boost) * prayer
-    effective_level = math.floor(effective_level)
-    effective_level += stance_bonus
-    effective_level += 8
-    if void:
-        effective_level *= 1.1
-    effective_level = math.floor(effective_level)
-    return effective_level
-
-
-def calc_effective_range_attack_level(
-    base_level: int,
-    boost: int,
-    prayer: float,
-    stance_bonus: int = 0,
-    void: bool = False,
-) -> int:
-    """Calcuate a player's effective range level
-
-    Args:
-        base_level (int): Non boosted range stat, from 1 to 99
-        boost (int): additional boost caused by potion, overload, smelling salts, etc
-        prayer (float): a postive multiplier from the range-attack-boosting offensive prayers like Rigour
-        stance_bonus (int, optional): combat stance in-game, typically +3 if stance is accurate. Defaults to 0
-        void (bool, optional): Whether the player is wearing Elite Void Range. Defaults to False.
-
-    Returns:
-        int: An effective range attack level
-    """
-    effective_level = (base_level + boost) * prayer
-    effective_level = math.floor(effective_level)
-    effective_level += stance_bonus
-    effective_level += 8
-    if void:
-        effective_level *= 1.1
-    effective_level = math.floor(effective_level)
-    return effective_level
-
-
-def calc_effective_magic_level(
-    base_level: int,
-    boost: int,
-    prayer: float,
-    stance_bonus: int = 0,
-    void: bool = False,
-) -> int:
-    """Calculate a player's effective magic level
-
-    Args:
-        base_level (int): Non boosted magic stat, from 1 to 99
-        boost (int): additional boost caused by imbued heart, overload, smelling salts, etc
-        prayer (float): a postive multiplier from the magic offensive prayers like Augury
-        stance_bonus (int): combat stance using a powered staff, typically +1 if stance is accurate. Defaults to 0
-        void (bool, optional): _description_. Whether the player is wearing Elite Void Mage. Defaults to False.
-
-    Returns:
-        int: An effective magic level
-    """
-    effective_level = (base_level + boost) * prayer
-    effective_level = math.floor(effective_level)
-    effective_level += stance_bonus
-    effective_level += 8
-    if void:
+    elif style.lower() == 'mage':
         effective_level *= 1.45
+
     effective_level = math.floor(effective_level)
     return effective_level
 
 
-def calc_effective_defence_level(
-    base_level: int, boost: int, prayer: float, stance_bonus: int = 0
+
+def calc_max_hit(
+    effective_level: int, equipment_bonus: int, target_bonus: float = 1.0
 ) -> int:
-    """Calculate a player's effective defence level
-
+    """Calculates the maximum rollable hit
     Args:
-        base_level (int): Non boosted defence stat, from 1 to 99
-        boost (int): additional boost caused by potion, overload, smelling salts, etc
-        prayer (float): a postive multiplier from prayer that provide defence
-        stance_bonus (int): combat stance boost from weapons, typically +3 if stance is defensive. Defaults to 0
-
-    Returns:
-        int: An effective defensive level
-    """
-    effective_level = (base_level + boost) * prayer
-    effective_level = math.floor(effective_level)
-    effective_level += stance_bonus
-    effective_level += 8
-    effective_level = math.floor(effective_level)
-    return effective_level
-
-
-def calc_max_melee_hit(
-    effective_strength_level: int, equipment_bonus: int, target_bonus: float = 1.0
-) -> int:
-    """Calculates the maximum rollable hit for a melee attack
-
-    Args:
-        effective_strength_level (int): effective strength level stat
+        effective_strength_level (int): effective strength or ranged level stat
         equipment_bonus (int): strength bonus shown on equipment screen
         target_bonus (float, optional): multiplier for damage buffs like slayer helmet or salve amulet. Defaults to 1.0.
 
     Returns:
         int: Maximum rollable melee damage for selected gear and stats
     """
-    max_hit = effective_strength_level * (equipment_bonus + 64)
+    max_hit = effective_level * (equipment_bonus + 64)
     max_hit += 320
     max_hit = math.floor(max_hit / 640)
     max_hit = math.floor(max_hit * target_bonus)
     return max_hit
 
-
-def calc_range_max_hit(
-    effective_range_level: int, equipment_bonus: int, target_bonus: float = 1.0
-) -> int:
-    """Calculates the maximum rollable hit for a range attack
-
-    Args:
-        effective_range_level (int): effective ranged strength level stat
-        equipment_bonus (int): ranged strength bonus shown on equipment screen
-        target_bonus (float, optional): multiplier for damage buffs like slayer helmet(i) or salve amulet(ei). Defaults to 1.0.
-
-    Returns:
-        int: maximum rollable range damage for selected gear and stats
-    """
-    max_hit = effective_range_level * (equipment_bonus + 64)
-    max_hit += 320
-    max_hit = math.floor(max_hit / 640)
-    max_hit = math.floor(max_hit * target_bonus)
-    return max_hit
 
 
 def calc_max_attack_roll(
